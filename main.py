@@ -5,26 +5,26 @@ import os
 
 app = Flask(__name__)
 
-# 環境変数からトークンとシークレットを取得
 line_bot_api = LineBotApi(os.environ.get("LINE_CHANNEL_ACCESS_TOKEN"))
 handler = WebhookHandler(os.environ.get("LINE_CHANNEL_SECRET"))
 
 @app.route("/callback", methods=['POST'])
 def callback():
-    signature = request.headers['X-Line-Signature']
+    signature = request.headers.get('X-Line-Signature')
     body = request.get_data(as_text=True)
 
     try:
         handler.handle(body, signature)
-    except:
+    except Exception as e:
+        print("Error:", e)
         abort(400)
 
     return 'OK'
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    user_text = event.message.text
-    reply_text = f"占い結果🔮\nあなたが送った内容：{user_text}"
+    text = event.message.text
+    reply_text = f"占い結果🔮\nあなたが送った内容：{text}"
     line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage(text=reply_text)
@@ -32,4 +32,3 @@ def handle_message(event):
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
-
