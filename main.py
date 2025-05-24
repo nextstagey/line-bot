@@ -90,7 +90,7 @@ def get_history(user_id):
 def handle_message(event):
     user_text = event.message.text.lower()
 
-    # 占いの種類を選ばせるボタン
+    # 「占い」メッセージが送られた場合、ボタンを表示
     if "占い" in user_text:
         buttons_template = ButtonsTemplate(
             title="占いの種類を選んでください",
@@ -102,8 +102,10 @@ def handle_message(event):
                 {"type": "message", "label": "西洋占星術", "text": "占星術"},
             ]
         )
+        # ここでボタンを送信
         line_bot_api.reply_message(event.reply_token, TemplateSendMessage(alt_text="占いの種類", template=buttons_template))
 
+    # ボタンの選択に応じて占い結果を返す
     elif "四柱推命" in user_text:
         result = shichu_suimei("1990-05-15")  # 仮の生年月日
     elif "タロット" in user_text:
@@ -118,6 +120,7 @@ def handle_message(event):
     # 結果をLINEに返信
     save_history(event.source.user_id, result)  # 履歴保存
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=result))
+
 
 # Webhookエンドポイント
 @app.route("/callback", methods=['POST'])
